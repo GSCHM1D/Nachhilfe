@@ -1,0 +1,236 @@
+/* nachhilfeboerse.ch – Legal-Styles
+   für Rechtstexte (Impressum, AGB, Nutzungsbedingungen, Datenschutz)
+   Struktur übernommen von holidayjob.ch/legal/legal.css
+*/
+
+:root {
+    --bg: #f5f7fb;
+    --surface: rgba(255, 255, 255, 0.92);
+    --surface-muted: #f8fafc;
+    --text: #1e293b;
+    --text-soft: #64748b;
+    --border: #dbe2ea;
+    --accent: #059669;
+    --accent-rgb: 5, 150, 105;
+    --max-width: 980px;
+    --radius: 18px;
+    --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background:
+        radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 22%),
+        var(--bg);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+    line-height: 1.65;
+    max-width: 1240px;
+    margin-inline: auto;
+    padding: 32px 20px 64px;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+a:hover,
+a:focus {
+    text-decoration: underline;
+}
+
+main {
+    max-width: var(--max-width);
+    margin: 24px auto;
+    padding: 32px 24px 48px;
+    background: var(--surface);
+    border: 1px solid rgba(219, 226, 234, 0.8);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+}
+
+main h1 {
+    font-size: clamp(2rem, 4vw, 2.7rem);
+    line-height: 1.15;
+    margin: 0 0 0.35rem 0;
+    letter-spacing: -0.02em;
+    color: #0f172a;
+}
+
+main > p:first-of-type {
+    color: var(--text-soft);
+    margin-top: 0;
+    margin-bottom: 2rem;
+}
+
+main h2 {
+    font-size: clamp(1.2rem, 2.4vw, 1.55rem);
+    line-height: 1.25;
+    margin-top: 2.2rem;
+    margin-bottom: 0.8rem;
+    letter-spacing: -0.01em;
+    color: #0f172a;
+}
+
+main p,
+main li {
+    font-size: 1rem;
+    color: var(--text);
+}
+
+main ul {
+    padding-left: 1.2rem;
+    margin: 0.6rem 0 1rem 0;
+}
+
+main li + li {
+    margin-top: 0.35rem;
+}
+
+main strong {
+    color: var(--text);
+}
+
+.legal-updated {
+    color: var(--text-soft);
+    font-size: 0.9rem;
+    margin-top: 2.4rem;
+}
+
+.placeholder {
+    background: #fef9c3;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-style: italic;
+}
+
+/* Disclaimer-Kasten (auf Rechtstext-Seiten oder als Section) */
+.legal-disclaimer {
+    max-width: var(--max-width);
+    margin: 24px auto 28px;
+    padding: 24px;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface-muted) 100%);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.legal-disclaimer h2 {
+    margin: 0 0 0.9rem 0;
+    font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: #0f172a;
+}
+
+.legal-disclaimer p {
+    margin: 0 0 0.9rem 0;
+    color: var(--text-soft);
+}
+
+.legal-disclaimer p:last-child {
+    margin-bottom: 0;
+}
+
+/* Footer (identisch zur Hauptseite) */
+.site-footer {
+    margin-top: 48px;
+    padding: 28px 20px 40px;
+    border-top: 1px solid var(--border);
+    background: var(--surface-muted);
+    color: var(--text-soft);
+    border-radius: 18px;
+}
+
+.site-footer p {
+    max-width: var(--max-width);
+    margin: 0 auto 0.75rem auto;
+    font-size: 0.96rem;
+    line-height: 1.6;
+}
+
+.site-footer p:last-child {
+    margin-bottom: 0;
+}
+
+.site-footer strong {
+    color: var(--text);
+}
+
+.site-footer a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.site-footer a:hover {
+    text-decoration: underline;
+}
+
+.footer-social {
+    max-width: var(--max-width);
+    margin: 26px auto 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.instagram-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.instagram-link:hover {
+    opacity: 0.8;
+}
+
+.instagram-link svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+    flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    body {
+        padding: 20px 12px 40px;
+    }
+
+    main {
+        padding: 28px 16px 48px;
+    }
+
+    .legal-disclaimer {
+        margin: 16px auto;
+        padding: 18px;
+    }
+
+    .site-footer {
+        padding: 24px 16px 32px;
+    }
+}

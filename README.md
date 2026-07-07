@@ -16,13 +16,14 @@ Schweiz – von Schülern für Schüler. Eine Schwesterplattform von
 
 | Datei                      | Zweck                                                        |
 | -------------------------- | ------------------------------------------------------------ |
-| `index.html`               | Startseite: Hero, So funktioniert's, Suche/Filter, drei Rubriken (Angebote, Gesuche, Lerngruppen), Formular, Disclaimer |
+| `index.html`               | Startseite: Page-Header, So funktioniert's, Suche/Filter, drei Rubriken (Angebote, Gesuche, Lerngruppen), Formular, Disclaimer-Gate |
 | `about.html`               | Über uns                                                     |
 | `impressum.html`           | Impressum (Platzhalter ausfüllen)                            |
 | `agb.html`                 | Allgemeine Geschäftsbedingungen                              |
 | `nutzungsbedingungen.html` | Nutzungsbedingungen                                          |
 | `datenschutz.html`         | Datenschutzerklärung                                         |
-| `styles.css`               | Design (Farbschema Grün)                                     |
+| `styles.css`               | Design (Struktur wie holidayjob.ch, Akzentfarbe Grün)        |
+| `legal.css`                | Design der Rechtstexte (Impressum, AGB, Datenschutz, Über uns) |
 | `app.js`                   | Laden, Filtern, Rendern der Karten, Formular-Logik           |
 | `api.js`                   | Verbindung zum Google Apps Script Backend                    |
 | `appscript.md`             | **Anleitung & Code fürs Backend** (Google Apps Script + Google Sheets) |

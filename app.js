@@ -1,58 +1,47 @@
 /* ============================================================
-   app.js – Logik der Seite (Laden, Filtern, Rendern, Formular)
-   nachhilfeboerse.ch
+   app.js – nachhilfeboerse.ch
+   Laden, Filtern, Rendern (Kartenstil wie holidayjob.ch),
+   Disclaimer-Gate, Filter-Popup, Formular
    ============================================================ */
 
 (function () {
   "use strict";
 
+  const DISCLAIMER_KEY = "nachhilfeboerse_disclaimer_ok";
+
   let alleEintraege = [];
+  let aktiveFilter = { text: "", fach: "", stufe: "", format: "", bezahlung: "" };
 
-  const grids = {
-    angebot: document.getElementById("gridAngebote"),
-    gesuch: document.getElementById("gridGesuche"),
-    lerngruppe: document.getElementById("gridLerngruppen")
-  };
+  const rubriken = [
+    { typ: "angebot", label: "🎓 Nachhilfe-Angebot", grid: "grid-angebot", count: "count-angebot",
+      leer: "Noch keine Angebote, die zu deinen Filtern passen. Bist du in einem Fach stark? Erfasse das erste Inserat." },
+    { typ: "gesuch", label: "🙋 Nachhilfe-Gesuch", grid: "grid-gesuch", count: "count-gesuch",
+      leer: "Keine passenden Gesuche gefunden. Du suchst Nachhilfe? Trag dich ein – es dauert keine zwei Minuten." },
+    { typ: "lerngruppe", label: "👥 Lerngruppe", grid: "grid-lerngruppe", count: "count-lerngruppe",
+      leer: "Noch keine Lerngruppe passt zu deinen Filtern. Gründe deine eigene – ohne Login." }
+  ];
 
-  const counts = {
-    angebot: document.getElementById("countAngebote"),
-    gesuch: document.getElementById("countGesuche"),
-    lerngruppe: document.getElementById("countLerngruppen")
-  };
+  /* ---------- DOM-Helfer (textContent → XSS-sicher) ---------- */
 
-  const stats = {
-    angebot: document.getElementById("statAngebote"),
-    gesuch: document.getElementById("statGesuche"),
-    lerngruppe: document.getElementById("statLerngruppen")
-  };
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text != null) node.textContent = text;
+    return node;
+  }
 
-  const typLabels = {
-    angebot: "Angebot",
-    gesuch: "Gesuch",
-    lerngruppe: "Lerngruppe"
-  };
-
-  const leereRubrik = {
-    angebot: "Noch keine Angebote, die zu deinen Filtern passen. Bist du in einem Fach stark? Erfasse das erste Inserat!",
-    gesuch: "Keine passenden Gesuche gefunden. Du suchst Nachhilfe? Trag dich ein – es dauert keine zwei Minuten.",
-    lerngruppe: "Noch keine Lerngruppe passt zu deinen Filtern. Gründe deine eigene – ohne Login."
-  };
-
-  /* ---------- Hilfsfunktionen ---------- */
-
-  function escapeHtml(text) {
-    return String(text == null ? "" : text)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
+  function metaItem(label, value, extraClass) {
+    const item = el("div", "job-meta-item");
+    if (extraClass) item.classList.add(extraClass);
+    item.appendChild(el("span", "job-meta-label", label));
+    item.appendChild(el("span", "job-meta-value", value == null ? "" : String(value)));
+    return item;
   }
 
   function formatDatum(iso) {
     if (!iso) return "";
     const d = new Date(iso);
-    if (isNaN(d.getTime())) return escapeHtml(iso);
+    if (isNaN(d.getTime())) return String(iso);
     return d.toLocaleDateString("de-CH", { day: "2-digit", month: "2-digit", year: "numeric" });
   }
 
@@ -60,263 +49,292 @@
     return /tausch/i.test(preis || "");
   }
 
-  /* ---------- Rendern ---------- */
+  /* ---------- Karte bauen ---------- */
 
-  function karteHtml(e) {
-    const badges = [
-      '<span class="badge">' + escapeHtml(e.fach || "Fach offen") + "</span>",
-      '<span class="badge badge-alt">' + escapeHtml(e.stufe || "Stufe offen") + "</span>"
-    ];
-    if (e.format) badges.push('<span class="badge badge-neutral">' + escapeHtml(e.format) + "</span>");
-    if (e.typ !== "lerngruppe" && istTausch(e.preis)) {
-      badges.push('<span class="badge badge-neutral">🔄 Tausch</span>');
-    }
+  function baueKarte(e, rubrik) {
+    const card = el("div", "job-card public-job-card");
 
-    const meta = [];
-    if (e.ort) meta.push("<li><strong>Ort:</strong> " + escapeHtml(e.ort) + "</li>");
+    const top = el("div", "job-card-top");
+    const badges = el("div", "job-badges");
+    if (e.fach) badges.appendChild(el("span", "job-category-badge", e.fach));
+    if (e.stufe) badges.appendChild(el("span", "job-badge-soft", e.stufe));
+    if (e.format) badges.appendChild(el("span", "job-badge-soft", e.format));
+    if (e.typ !== "lerngruppe" && istTausch(e.preis)) badges.appendChild(el("span", "job-badge-soft", "🔄 Tausch"));
+    top.appendChild(badges);
+    top.appendChild(el("h3", "job-title", e.titel || "Ohne Titel"));
+    top.appendChild(el("p", "job-company", rubrik.label));
+    card.appendChild(top);
+
+    const body = el("div", "job-card-body");
+    const list = el("div", "job-meta-list");
+    if (e.ort) list.appendChild(metaItem("Ort", e.ort, null));
     if (e.typ === "lerngruppe") {
-      if (e.gruppengroesse) meta.push("<li><strong>Gesucht:</strong> " + escapeHtml(e.gruppengroesse) + " Person(en)</li>");
-      if (e.zeitraum) meta.push("<li><strong>Zeitraum:</strong> " + escapeHtml(e.zeitraum) + "</li>");
+      if (e.gruppengroesse) list.appendChild(metaItem("Gesucht", e.gruppengroesse + " Person(en)", "job-meta-highlight"));
+      if (e.zeitraum) list.appendChild(metaItem("Zeitraum", e.zeitraum, null));
     } else if (e.preis) {
-      meta.push("<li><strong>Preis / Tausch:</strong> " + escapeHtml(e.preis) + "</li>");
+      list.appendChild(metaItem("Preis / Tausch", e.preis, "job-meta-highlight"));
     }
+    body.appendChild(list);
 
-    const kontakt = [];
+    if (e.beschreibung) {
+      const block = el("div", "job-description-block");
+      block.appendChild(el("p", "job-description", e.beschreibung));
+      body.appendChild(block);
+    }
+    card.appendChild(body);
+
+    const footer = el("div", "job-card-footer");
+    footer.appendChild(el("span", "job-contact-label", "Kontakt"));
+    const val = el("div", "job-contact-value");
+    val.appendChild(el("span", null, e.name || "Anonym"));
     if (e.email) {
-      kontakt.push('<a href="mailto:' + escapeHtml(e.email) + '">✉️ ' + escapeHtml(e.email) + "</a>");
+      const a = el("a", null, "✉️ " + e.email);
+      a.href = "mailto:" + e.email;
+      val.appendChild(a);
     }
     if (e.telefon) {
-      kontakt.push('<a href="tel:' + escapeHtml(String(e.telefon).replace(/\s+/g, "")) + '">📞 ' + escapeHtml(e.telefon) + "</a>");
+      const a = el("a", null, "📞 " + e.telefon);
+      a.href = "tel:" + String(e.telefon).replace(/\s+/g, "");
+      val.appendChild(a);
     }
+    footer.appendChild(val);
+    if (e.erstellt) footer.appendChild(el("span", "job-card-date", "Inserat vom " + formatDatum(e.erstellt)));
+    card.appendChild(footer);
 
-    return (
-      '<article class="entry-card">' +
-      '<div class="entry-badges">' + badges.join("") + "</div>" +
-      "<h3>" + escapeHtml(e.titel || "Ohne Titel") + "</h3>" +
-      '<p class="entry-desc">' + escapeHtml(e.beschreibung || "") + "</p>" +
-      '<ul class="entry-meta">' + meta.join("") + "</ul>" +
-      '<div class="entry-contact">' +
-      '<div class="contact-name">' + escapeHtml(e.name || "Anonym") + "</div>" +
-      kontakt.join("<br>") +
-      "</div>" +
-      '<div class="entry-date">Inserat vom ' + formatDatum(e.erstellt) + "</div>" +
-      "</article>"
-    );
+    return card;
   }
 
-  function renderAlle() {
-    const gefiltert = filternAnwenden(alleEintraege);
+  /* ---------- Filtern ---------- */
 
-    Object.keys(grids).forEach(function (typ) {
-      const grid = grids[typ];
+  function passt(e) {
+    if (aktiveFilter.fach && e.fach !== aktiveFilter.fach) return false;
+    if (aktiveFilter.stufe && e.stufe !== aktiveFilter.stufe) return false;
+    if (aktiveFilter.format && e.format !== aktiveFilter.format) return false;
+    if (aktiveFilter.bezahlung === "tausch" && !istTausch(e.preis)) return false;
+    if (aktiveFilter.bezahlung === "geld" && istTausch(e.preis)) return false;
+    if (aktiveFilter.text) {
+      const raum = [e.titel, e.beschreibung, e.ort, e.name, e.fach].join(" ").toLowerCase();
+      if (raum.indexOf(aktiveFilter.text) === -1) return false;
+    }
+    return true;
+  }
+
+  /* ---------- Rendern ---------- */
+
+  function render() {
+    const gefiltert = alleEintraege.filter(passt);
+
+    rubriken.forEach(function (r) {
+      const grid = document.getElementById(r.grid);
+      const countEl = document.getElementById(r.count);
       if (!grid) return;
-      const eintraege = gefiltert.filter(function (e) { return e.typ === typ; });
-      if (eintraege.length === 0) {
-        grid.innerHTML = '<div class="empty-state">' + leereRubrik[typ] + "</div>";
+      const items = gefiltert
+        .filter(function (e) { return e.typ === r.typ; })
+        .sort(function (a, b) { return String(b.erstellt).localeCompare(String(a.erstellt)); });
+      grid.innerHTML = "";
+      if (items.length === 0) {
+        grid.appendChild(el("p", "rubrik-empty", r.leer));
       } else {
-        grid.innerHTML = eintraege
-          .slice()
-          .sort(function (a, b) { return String(b.erstellt).localeCompare(String(a.erstellt)); })
-          .map(karteHtml)
-          .join("");
+        items.forEach(function (e) { grid.appendChild(baueKarte(e, r)); });
       }
-      if (counts[typ]) counts[typ].textContent = eintraege.length;
+      if (countEl) countEl.textContent = items.length;
     });
 
-    Object.keys(stats).forEach(function (typ) {
-      if (stats[typ]) {
-        stats[typ].textContent = alleEintraege.filter(function (e) { return e.typ === typ; }).length;
-      }
-    });
-
-    const hint = document.getElementById("filterHint");
+    const hint = document.getElementById("filter-hint");
     if (hint) {
-      hint.textContent = gefiltert.length + " von " + alleEintraege.length + " Inseraten sichtbar.";
+      const total = alleEintraege.length;
+      hint.textContent = gefiltert.length === total
+        ? total + " Inserate insgesamt."
+        : gefiltert.length + " von " + total + " Inseraten sichtbar.";
     }
   }
 
-  /* ---------- Filter ---------- */
+  /* ---------- Filter-Popup ---------- */
 
-  const filterFelder = {
-    text: document.getElementById("filterText"),
-    fach: document.getElementById("filterFach"),
-    stufe: document.getElementById("filterStufe"),
-    format: document.getElementById("filterFormat"),
-    bezahlung: document.getElementById("filterBezahlung")
-  };
+  function initFilter() {
+    const toggle = document.getElementById("filter-toggle");
+    const popup = document.getElementById("filter-popup");
+    const close = document.getElementById("filter-popup-close");
+    const felder = {
+      text: document.getElementById("filter-text"),
+      fach: document.getElementById("filter-fach"),
+      stufe: document.getElementById("filter-stufe"),
+      format: document.getElementById("filter-format"),
+      bezahlung: document.getElementById("filter-bezahlung")
+    };
 
-  function filternAnwenden(eintraege) {
-    const text = (filterFelder.text && filterFelder.text.value || "").trim().toLowerCase();
-    const fach = filterFelder.fach && filterFelder.fach.value || "";
-    const stufe = filterFelder.stufe && filterFelder.stufe.value || "";
-    const format = filterFelder.format && filterFelder.format.value || "";
-    const bezahlung = filterFelder.bezahlung && filterFelder.bezahlung.value || "";
+    function lese() {
+      aktiveFilter = {
+        text: (felder.text.value || "").trim().toLowerCase(),
+        fach: felder.fach.value,
+        stufe: felder.stufe.value,
+        format: felder.format.value,
+        bezahlung: felder.bezahlung.value
+      };
+      render();
+    }
 
-    return eintraege.filter(function (e) {
-      if (fach && e.fach !== fach) return false;
-      if (stufe && e.stufe !== stufe) return false;
-      if (format && e.format !== format) return false;
-      if (bezahlung === "tausch" && !istTausch(e.preis)) return false;
-      if (bezahlung === "geld" && istTausch(e.preis)) return false;
-      if (text) {
-        const suchraum = [e.titel, e.beschreibung, e.ort, e.name, e.fach]
-          .join(" ")
-          .toLowerCase();
-        if (suchraum.indexOf(text) === -1) return false;
-      }
-      return true;
-    });
-  }
-
-  function filterBinden() {
-    Object.keys(filterFelder).forEach(function (key) {
-      const feld = filterFelder[key];
-      if (!feld) return;
-      feld.addEventListener("input", renderAlle);
-      feld.addEventListener("change", renderAlle);
-    });
-    const reset = document.getElementById("filterReset");
-    if (reset) {
-      reset.addEventListener("click", function () {
-        Object.keys(filterFelder).forEach(function (key) {
-          if (filterFelder[key]) filterFelder[key].value = "";
-        });
-        renderAlle();
+    if (toggle && popup) {
+      toggle.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        popup.classList.toggle("open");
+      });
+      if (close) close.addEventListener("click", function () { popup.classList.remove("open"); });
+      document.addEventListener("click", function (ev) {
+        if (popup.classList.contains("open") && !popup.contains(ev.target) && ev.target !== toggle) {
+          popup.classList.remove("open");
+        }
       });
     }
+    Object.keys(felder).forEach(function (k) {
+      if (felder[k]) { felder[k].addEventListener("input", lese); felder[k].addEventListener("change", lese); }
+    });
+    const apply = document.getElementById("apply-filters");
+    const reset = document.getElementById("reset-filters");
+    if (apply) apply.addEventListener("click", function () { lese(); if (popup) popup.classList.remove("open"); });
+    if (reset) reset.addEventListener("click", function () {
+      Object.keys(felder).forEach(function (k) { if (felder[k]) felder[k].value = ""; });
+      lese();
+    });
   }
 
   /* ---------- Formular ---------- */
 
-  function formularTypWechsel() {
-    const gewaehlt = document.querySelector('input[name="typ"]:checked');
-    const typ = gewaehlt ? gewaehlt.value : "angebot";
-    document.querySelectorAll("[data-show-for]").forEach(function (feld) {
-      const fuer = feld.getAttribute("data-show-for").split(" ");
-      const sichtbar = fuer.indexOf(typ) !== -1;
-      feld.style.display = sichtbar ? "" : "none";
-      feld.querySelectorAll("input, select, textarea").forEach(function (input) {
-        input.disabled = !sichtbar;
+  function initForm() {
+    const toggle = document.getElementById("job-form-toggle");
+    const wrapper = document.getElementById("job-form-wrapper");
+    if (toggle && wrapper) {
+      toggle.addEventListener("click", function () {
+        toggle.classList.toggle("active");
+        wrapper.classList.toggle("open");
+      });
+    }
+    document.querySelectorAll("#header-post-link").forEach(function (link) {
+      link.addEventListener("click", function () {
+        if (toggle && wrapper && !wrapper.classList.contains("open")) {
+          toggle.classList.add("active");
+          wrapper.classList.add("open");
+        }
       });
     });
-  }
 
-  function meldung(text, art) {
-    const box = document.getElementById("formMessage");
-    if (!box) return;
-    box.textContent = text;
-    box.className = "form-message " + art;
-  }
+    function typWechsel() {
+      const gewaehlt = document.querySelector('input[name="typ"]:checked');
+      const typ = gewaehlt ? gewaehlt.value : "angebot";
+      document.querySelectorAll("#entry-form [data-show-for]").forEach(function (feld) {
+        const sichtbar = feld.getAttribute("data-show-for").split(" ").indexOf(typ) !== -1;
+        feld.style.display = sichtbar ? "" : "none";
+        feld.disabled = !sichtbar;
+      });
+    }
+    document.querySelectorAll('input[name="typ"]').forEach(function (r) {
+      r.addEventListener("change", typWechsel);
+    });
+    typWechsel();
 
-  function formularBinden() {
-    const form = document.getElementById("entryForm");
+    const form = document.getElementById("entry-form");
     if (!form) return;
 
-    document.querySelectorAll('input[name="typ"]').forEach(function (radio) {
-      radio.addEventListener("change", formularTypWechsel);
-    });
-    formularTypWechsel();
-
-    form.addEventListener("submit", async function (event) {
-      event.preventDefault();
-
-      // Honeypot: Wenn das unsichtbare Feld gefüllt ist, war es ein Bot.
-      const honeypot = document.getElementById("fWebsite");
+    form.addEventListener("submit", async function (ev) {
+      ev.preventDefault();
+      const honeypot = document.getElementById("f-website");
       if (honeypot && honeypot.value) return;
-
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
+      if (!form.checkValidity()) { form.reportValidity(); return; }
 
       const gewaehlt = document.querySelector('input[name="typ"]:checked');
+      const preisEl = document.getElementById("f-preis");
+      const gruppeEl = document.getElementById("f-gruppe");
+      const zeitraumEl = document.getElementById("f-zeitraum");
       const eintrag = {
         typ: gewaehlt ? gewaehlt.value : "angebot",
-        titel: document.getElementById("fTitel").value.trim(),
-        fach: document.getElementById("fFach").value,
-        stufe: document.getElementById("fStufe").value,
-        ort: document.getElementById("fOrt").value.trim(),
-        format: document.getElementById("fFormat").value,
-        preis: document.getElementById("fPreis").disabled ? "" : document.getElementById("fPreis").value.trim(),
-        gruppengroesse: document.getElementById("fGruppe").disabled ? "" : document.getElementById("fGruppe").value.trim(),
-        zeitraum: document.getElementById("fZeitraum").disabled ? "" : document.getElementById("fZeitraum").value.trim(),
-        beschreibung: document.getElementById("fBeschreibung").value.trim(),
-        name: document.getElementById("fName").value.trim(),
-        email: document.getElementById("fEmail").value.trim(),
-        telefon: document.getElementById("fTelefon").value.trim(),
+        titel: document.getElementById("f-titel").value.trim(),
+        fach: document.getElementById("f-fach").value,
+        stufe: document.getElementById("f-stufe").value,
+        ort: document.getElementById("f-ort").value.trim(),
+        format: document.getElementById("f-format").value,
+        preis: preisEl.disabled ? "" : preisEl.value.trim(),
+        gruppengroesse: gruppeEl.disabled ? "" : gruppeEl.value.trim(),
+        zeitraum: zeitraumEl.disabled ? "" : zeitraumEl.value.trim(),
+        beschreibung: document.getElementById("f-beschreibung").value.trim(),
+        name: document.getElementById("f-name").value.trim(),
+        email: document.getElementById("f-email").value.trim(),
+        telefon: document.getElementById("f-telefon").value.trim(),
         erstellt: new Date().toISOString().slice(0, 10)
       };
 
-      const submitBtn = document.getElementById("submitBtn");
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Wird gespeichert …";
-
+      const btn = document.getElementById("submit-btn");
+      btn.disabled = true;
+      btn.textContent = "Wird gespeichert …";
       try {
         const antwort = await apiCreateEntry(eintrag);
         if (antwort && antwort.ok) {
           eintrag.id = "lokal-" + Date.now();
           alleEintraege.push(eintrag);
-          renderAlle();
+          render();
           form.reset();
-          formularTypWechsel();
-          meldung(
-            antwort.demo
-              ? "Demo-Modus: Das Backend ist noch nicht verbunden (API_URL in api.js). Dein Inserat wird nur lokal angezeigt."
-              : "Danke! Dein Inserat wurde gespeichert und erscheint jetzt als Karte in der passenden Rubrik.",
-            "success"
-          );
+          typWechsel();
+          meldung(antwort.demo
+            ? "Demo-Modus: Das Backend ist noch nicht verbunden (API_URL in api.js). Dein Inserat wird nur lokal angezeigt."
+            : "Danke! Dein Inserat wurde gespeichert und erscheint jetzt als Karte in der passenden Rubrik.", "success");
         } else {
           meldung("Das hat leider nicht geklappt: " + (antwort && antwort.error ? antwort.error : "Unbekannter Fehler"), "error");
         }
       } catch (fehler) {
-        meldung("Das Inserat konnte nicht gespeichert werden. Bitte versuche es später nochmals. (" + fehler.message + ")", "error");
+        meldung("Das Inserat konnte nicht gespeichert werden. Bitte später erneut versuchen. (" + fehler.message + ")", "error");
       } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Inserat veröffentlichen";
+        btn.disabled = false;
+        btn.textContent = "Inserat veröffentlichen";
       }
     });
   }
 
-  /* ---------- Navigation (Mobile) ---------- */
+  function meldung(text, art) {
+    const box = document.getElementById("entry-message");
+    if (!box) return;
+    box.textContent = text;
+    box.className = "message-box show " + (art === "success" ? "message-success" : "message-error");
+  }
 
-  function navBinden() {
-    const toggle = document.getElementById("navToggle");
-    const nav = document.getElementById("mainNav");
-    if (!toggle || !nav) return;
-    toggle.addEventListener("click", function () {
-      nav.classList.toggle("open");
-    });
-    nav.querySelectorAll("a").forEach(function (link) {
-      link.addEventListener("click", function () {
-        nav.classList.remove("open");
+  /* ---------- Disclaimer-Gate ---------- */
+
+  function initDisclaimer() {
+    const gate = document.getElementById("disclaimer-gate");
+    const btn = document.getElementById("accept-disclaimer-btn");
+    if (!gate) return;
+    let akzeptiert = false;
+    try { akzeptiert = localStorage.getItem(DISCLAIMER_KEY) === "1"; } catch (e) {}
+    if (!akzeptiert) {
+      gate.classList.remove("hidden");
+      document.body.classList.add("disclaimer-open");
+    }
+    if (btn) {
+      btn.addEventListener("click", function () {
+        try { localStorage.setItem(DISCLAIMER_KEY, "1"); } catch (e) {}
+        gate.classList.add("hidden");
+        document.body.classList.remove("disclaimer-open");
       });
-    });
+    }
   }
 
   /* ---------- Start ---------- */
 
   async function init() {
-    navBinden();
-    filterBinden();
-    formularBinden();
-
-    Object.keys(grids).forEach(function (typ) {
-      if (grids[typ]) grids[typ].innerHTML = '<div class="empty-state">Inserate werden geladen …</div>';
-    });
+    initDisclaimer();
+    initFilter();
+    initForm();
 
     try {
       alleEintraege = await apiFetchEntries();
     } catch (fehler) {
       console.error(fehler);
       alleEintraege = [];
-      Object.keys(grids).forEach(function (typ) {
-        if (grids[typ]) {
-          grids[typ].innerHTML = '<div class="empty-state">Die Inserate konnten nicht geladen werden. Bitte lade die Seite später neu.</div>';
-        }
+      rubriken.forEach(function (r) {
+        const grid = document.getElementById(r.grid);
+        if (grid) { grid.innerHTML = ""; grid.appendChild(el("p", "rubrik-empty", "Die Inserate konnten nicht geladen werden. Bitte lade die Seite später neu.")); }
       });
       return;
     }
-    renderAlle();
+    render();
   }
 
   document.addEventListener("DOMContentLoaded", init);
