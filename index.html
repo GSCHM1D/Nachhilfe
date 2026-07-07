@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>nachhilfeboerse.ch – Nachhilfe &amp; Lernpartner, von Schülern für Schüler</title>
+  <meta name="description" content="Die kostenlose Nachhilfe- und Lernpartner-Börse für Jugendliche in der Schweiz. Nachhilfe anbieten, Nachhilfe finden oder eine Lerngruppe gründen – ohne Login, direkt und unkompliziert.">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ================= Header ================= -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand">
+        <!-- Platzhalter-Logo: eigenes Logo in assets/logo.svg ersetzen -->
+        <img src="assets/logo.svg" alt="Logo nachhilfeboerse.ch">
+        <span class="brand-name">nachhilfeboerse<span class="tld">.ch</span></span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen">☰</button>
+      <nav class="main-nav" id="mainNav">
+        <a href="#so-funktionierts">So funktioniert's</a>
+        <a href="#angebote">Nachhilfe-Angebote</a>
+        <a href="#gesuche">Gesuche</a>
+        <a href="#lerngruppen">Lerngruppen</a>
+        <a href="about.html">Über uns</a>
+        <a href="#inserieren" class="btn btn-primary btn-small">Inserat erfassen</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ================= Hero ================= -->
+  <section class="hero">
+    <div class="container">
+      <span class="hero-badge">100 % kostenlos · ohne Login · von Schülern für Schüler</span>
+      <h1>Nachhilfe geben, Nachhilfe finden oder eine <span class="highlight">Lerngruppe</span> gründen.</h1>
+      <p class="hero-lead">
+        Du bist stark in Mathe? Verdiene dir etwas dazu oder tausche dein Wissen.
+        Du brauchst Hilfe in Französisch? Finde jemanden aus deiner Region.
+        Prüfung im Anmarsch? Such dir deine Lerngruppe.
+      </p>
+      <div class="hero-actions">
+        <a href="#angebote" class="btn btn-primary">Nachhilfe finden</a>
+        <a href="#inserieren" class="btn btn-outline">Inserat erfassen</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-number" id="statAngebote">–</div><div class="stat-label">Nachhilfe-Angebote</div></div>
+        <div class="stat"><div class="stat-number" id="statGesuche">–</div><div class="stat-label">Gesuche</div></div>
+        <div class="stat"><div class="stat-number" id="statLerngruppen">–</div><div class="stat-label">Lerngruppen</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= So funktioniert's ================= -->
+  <section class="section" id="so-funktionierts">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">So funktioniert's</span>
+        <h2>In drei Schritten zum Lernerfolg</h2>
+        <p>Kein Konto, keine Gebühren, keine Umwege – genau wie bei holidayjob.ch.</p>
+      </div>
+      <div class="steps">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <h3>Inserat erfassen – ohne Login</h3>
+          <p>Trage dein Angebot, dein Gesuch oder deine Lerngruppe direkt im Formular ein. Fach, Schulstufe, Ort, Preis oder Tausch – fertig.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <h3>Dein Inserat erscheint als Karte</h3>
+          <p>Dein Eintrag wird in der passenden Rubrik als Karte angezeigt – mit allen Angaben und deinem Kontakt.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <h3>Direkt Kontakt aufnehmen</h3>
+          <p>Interessierte melden sich direkt bei dir per E-Mail oder Telefon. Ihr macht alles Weitere unter euch ab.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Suche / Filter ================= -->
+  <section class="section section-soft" id="suche">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">Suchen &amp; filtern</span>
+        <h2>Finde, was zu dir passt</h2>
+        <p>Die Filter wirken auf alle drei Rubriken gleichzeitig: Angebote, Gesuche und Lerngruppen.</p>
+      </div>
+      <div class="filter-bar">
+        <input type="search" id="filterText" placeholder="Suchbegriff, Ort, Name …">
+        <select id="filterFach">
+          <option value="">Alle Fächer</option>
+          <option>Mathematik</option>
+          <option>Deutsch</option>
+          <option>Französisch</option>
+          <option>Englisch</option>
+          <option>Italienisch</option>
+          <option>Latein</option>
+          <option>Chemie</option>
+          <option>Physik</option>
+          <option>Biologie</option>
+          <option>Geschichte</option>
+          <option>Wirtschaft &amp; Recht</option>
+          <option>Informatik</option>
+          <option>Anderes Fach</option>
+        </select>
+        <select id="filterStufe">
+          <option value="">Alle Schulstufen</option>
+          <option>Primarschule</option>
+          <option>Sekundarschule / Bezirksschule</option>
+          <option>Gymnasium / Kanti</option>
+          <option>Berufsschule / Lehre</option>
+          <option>Studium</option>
+        </select>
+        <select id="filterFormat">
+          <option value="">Vor Ort &amp; online</option>
+          <option>Vor Ort</option>
+          <option>Online</option>
+          <option>Vor Ort oder online</option>
+        </select>
+        <select id="filterBezahlung">
+          <option value="">Geld &amp; Tausch</option>
+          <option value="geld">Bezahlung in Franken</option>
+          <option value="tausch">Tausch (Wissen gegen Wissen)</option>
+        </select>
+        <button class="filter-reset" id="filterReset" type="button">Filter zurücksetzen</button>
+      </div>
+      <p class="filter-hint" id="filterHint"></p>
+    </div>
+  </section>
+
+  <!-- ================= Nachhilfe-Angebote ================= -->
+  <section class="section" id="angebote">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">Rubrik 1</span>
+        <h2>Nachhilfe-Angebote<span class="count-pill" id="countAngebote">0</span></h2>
+        <p>Jugendliche, die dir ein Fach erklären – gegen Taschengeld oder im Tausch gegen dein Wissen.</p>
+      </div>
+      <div class="card-grid" id="gridAngebote"></div>
+    </div>
+  </section>
+
+  <!-- ================= Nachhilfe-Gesuche ================= -->
+  <section class="section section-soft" id="gesuche">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">Rubrik 2</span>
+        <h2>Nachhilfe-Gesuche<span class="count-pill" id="countGesuche">0</span></h2>
+        <p>Hier suchen Schülerinnen und Schüler Unterstützung. Bist du in einem dieser Fächer stark? Melde dich direkt.</p>
+      </div>
+      <div class="card-grid" id="gridGesuche"></div>
+    </div>
+  </section>
+
+  <!-- ================= Lerngruppen ================= -->
+  <section class="section" id="lerngruppen">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">Rubrik 3</span>
+        <h2>Lerngruppen<span class="count-pill" id="countLerngruppen">0</span></h2>
+        <p>Gemeinsam statt einsam: Lerngruppen für Prüfungen, Abschlussarbeiten und alles dazwischen.</p>
+      </div>
+      <div class="card-grid" id="gridLerngruppen"></div>
+    </div>
+  </section>
+
+  <!-- ================= Inserat erfassen ================= -->
+  <section class="section section-soft" id="inserieren">
+    <div class="container">
+      <div class="section-head">
+        <span class="kicker">Mitmachen</span>
+        <h2>Inserat erfassen – ohne Login</h2>
+        <p>Wähle die Art deines Inserats, fülle das Formular aus und dein Eintrag erscheint als Karte in der passenden Rubrik.</p>
+      </div>
+      <form class="form-wrap" id="entryForm" novalidate>
+        <div class="type-switch" id="typeSwitch">
+          <label><input type="radio" name="typ" value="angebot" checked> 🎓 Ich biete Nachhilfe</label>
+          <label><input type="radio" name="typ" value="gesuch"> 🙋 Ich suche Nachhilfe</label>
+          <label><input type="radio" name="typ" value="lerngruppe"> 👥 Ich suche eine Lerngruppe</label>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-field full">
+            <label for="fTitel">Titel deines Inserats</label>
+            <input type="text" id="fTitel" name="titel" maxlength="90" required
+                   placeholder="z. B. Mathe-Nachhilfe fürs Gymi – geduldig erklärt">
+          </div>
+
+          <div class="form-field">
+            <label for="fFach">Fach</label>
+            <select id="fFach" name="fach" required>
+              <option value="" disabled selected>Fach wählen …</option>
+              <option>Mathematik</option>
+              <option>Deutsch</option>
+              <option>Französisch</option>
+              <option>Englisch</option>
+              <option>Italienisch</option>
+              <option>Latein</option>
+              <option>Chemie</option>
+              <option>Physik</option>
+              <option>Biologie</option>
+              <option>Geschichte</option>
+              <option>Wirtschaft &amp; Recht</option>
+              <option>Informatik</option>
+              <option>Anderes Fach</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="fStufe">Schulstufe</label>
+            <select id="fStufe" name="stufe" required>
+              <option value="" disabled selected>Schulstufe wählen …</option>
+              <option>Primarschule</option>
+              <option>Sekundarschule / Bezirksschule</option>
+              <option>Gymnasium / Kanti</option>
+              <option>Berufsschule / Lehre</option>
+              <option>Studium</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="fOrt">Ort / Region</label>
+            <input type="text" id="fOrt" name="ort" required placeholder="z. B. Baden AG">
+          </div>
+
+          <div class="form-field">
+            <label for="fFormat">Format</label>
+            <select id="fFormat" name="format" required>
+              <option value="" disabled selected>Format wählen …</option>
+              <option>Vor Ort</option>
+              <option>Online</option>
+              <option>Vor Ort oder online</option>
+            </select>
+          </div>
+
+          <div class="form-field" data-show-for="angebot gesuch">
+            <label for="fPreis">Preis oder Tausch</label>
+            <input type="text" id="fPreis" name="preis"
+                   placeholder="z. B. 20 CHF/h – oder: Tausch gegen Franz-Nachhilfe">
+          </div>
+
+          <div class="form-field" data-show-for="lerngruppe">
+            <label for="fGruppe">Gesuchte Personen <span class="optional">(Anzahl)</span></label>
+            <input type="number" id="fGruppe" name="gruppengroesse" min="1" max="20" placeholder="z. B. 3">
+          </div>
+
+          <div class="form-field" data-show-for="lerngruppe">
+            <label for="fZeitraum">Zeitraum / Termin</label>
+            <input type="text" id="fZeitraum" name="zeitraum" placeholder="z. B. bis zur Matheprüfung im Mai, jeweils mittwochs">
+          </div>
+
+          <div class="form-field full">
+            <label for="fBeschreibung">Beschreibung</label>
+            <textarea id="fBeschreibung" name="beschreibung" maxlength="600" required
+                      placeholder="Erzähl kurz, wer du bist, was du anbietest oder suchst und was dir wichtig ist."></textarea>
+          </div>
+
+          <div class="form-field">
+            <label for="fName">Vorname / Name</label>
+            <input type="text" id="fName" name="name" required placeholder="z. B. Lena M.">
+          </div>
+
+          <div class="form-field">
+            <label for="fEmail">E-Mail <span class="optional">(öffentlich sichtbar)</span></label>
+            <input type="email" id="fEmail" name="email" required placeholder="dein.name@example.com">
+          </div>
+
+          <div class="form-field">
+            <label for="fTelefon">Telefon <span class="optional">(optional, öffentlich sichtbar)</span></label>
+            <input type="tel" id="fTelefon" name="telefon" placeholder="z. B. 079 123 45 67">
+          </div>
+
+          <!-- Honeypot gegen Spam-Bots: Feld bleibt für Menschen unsichtbar und leer -->
+          <div class="hp-field" aria-hidden="true">
+            <label for="fWebsite">Website</label>
+            <input type="text" id="fWebsite" name="website" tabindex="-1" autocomplete="off">
+          </div>
+
+          <label class="form-consent">
+            <input type="checkbox" id="fConsent" required>
+            <span>Ich bin einverstanden, dass mein Inserat inklusive Name und Kontaktangaben öffentlich auf nachhilfeboerse.ch angezeigt wird, und akzeptiere die <a href="agb.html">AGB</a> sowie die <a href="nutzungsbedingungen.html">Nutzungsbedingungen</a>.</span>
+          </label>
+
+          <div class="form-message" id="formMessage" role="status"></div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="submitBtn">Inserat veröffentlichen</button>
+            <span class="form-note">Kostenlos · ohne Login · Löschung jederzeit per E-Mail möglich</span>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ================= Disclaimer ================= -->
+  <section class="section">
+    <div class="container">
+      <div class="disclaimer-box">
+        <h3>⚠️ Wichtiger Hinweis</h3>
+        <p>
+          nachhilfeboerse.ch stellt ausschliesslich die technische Möglichkeit zur Verfügung, Inserate zu erfassen
+          und zu veröffentlichen sowie Kontaktangaben zugänglich zu machen. Die Plattform vermittelt selber keine
+          Nachhilfe, trifft keine Auswahlentscheidungen und ist weder Anbieterin noch Nachfragerin der inserierten
+          Leistungen. Der Kontakt erfolgt direkt zwischen den im Inserat genannten Personen; nachhilfeboerse.ch ist
+          am weiteren Austausch, an Vereinbarungen und an der Durchführung nicht beteiligt und übernimmt dafür keine
+          Verantwortung.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= Footer ================= -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="brand-name">nachhilfeboerse<span class="tld" style="color:#34d399">.ch</span></span>
+          <p>Die kostenlose Nachhilfe- und Lernpartner-Börse für Jugendliche in der Schweiz – von Schülern für Schüler. Eine Schwesterplattform von holidayjob.ch.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Plattform</h4>
+          <ul>
+            <li><a href="index.html#so-funktionierts">So funktioniert's</a></li>
+            <li><a href="index.html#angebote">Nachhilfe-Angebote</a></li>
+            <li><a href="index.html#gesuche">Gesuche</a></li>
+            <li><a href="index.html#lerngruppen">Lerngruppen</a></li>
+            <li><a href="index.html#inserieren">Inserat erfassen</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Rechtliches</h4>
+          <ul>
+            <li><a href="impressum.html">Impressum</a></li>
+            <li><a href="agb.html">AGB</a></li>
+            <li><a href="nutzungsbedingungen.html">Nutzungsbedingungen</a></li>
+            <li><a href="datenschutz.html">Datenschutz</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Mehr von uns</h4>
+          <ul>
+            <li><a href="about.html">Über uns</a></li>
+            <li><a href="https://www.holidayjob.ch" target="_blank" rel="noopener">holidayjob.ch – Ferienjobs</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-disclaimer">
+        <strong>Hinweis:</strong> nachhilfeboerse.ch stellt ausschliesslich die technische Möglichkeit zur Verfügung,
+        Inserate zu erfassen und zu veröffentlichen sowie Kontaktangaben zugänglich zu machen. Die Plattform vermittelt
+        selber keine Nachhilfe und ist an Vereinbarungen zwischen den Nutzenden nicht beteiligt.
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 nachhilfeboerse.ch – alle Angaben ohne Gewähr</span>
+        <span>Mit ❤️ gebaut – von Schülern für Schüler</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
